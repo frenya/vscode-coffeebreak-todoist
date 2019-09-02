@@ -1,6 +1,6 @@
 {
 		"name": "vscode-coffeebreak-todoist",
-		"displayName": "vscode-coffeebreak-todoist",
+		"displayName": "Coffee Break: Todoist Sync",
 		"description": "Todoist sync plugin for vscode-coffeebreak",
 		"icon": "resources/logo/CoffeeBreak.png",
 		"version": "0.1.0",
