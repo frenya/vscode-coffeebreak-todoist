@@ -51,64 +51,53 @@ async function sync (tasks: any[], uri: vscode.Uri, options: object = {}) {
 
   // Make sure we have an authentication token
   const token = await getToken();
-  if (!token) {
-    throw new Error('No Todoist token available');
-  }
+  if (!token) throw new Error('No Todoist token available');
   // else console.log(token);
 
-  const cmds = tasks.map(constructTodoistCommand);
+  return Promise.all(tasks.map(syncTask));
 
-  // console.log('Synchronizing to Todoist', defaults, tasks, cmds);
+  async function syncTask (task) {
+    // TODO: Move this to Coffee Break itself
+    task.backlinkURL = `vscode://file/${encodeURIComponent(task.filePath)}:${task.lineNr+1}`;
 
-  console.log('Sending commands', JSON.stringify(cmds, null, 2));
-  const response = await callTodoistSyncAPI(token, JSON.stringify(cmds));
-
-  console.log('Got response from Todoist');
-  console.log(response);
-
-  // Check sync_status and warn in some commands not successfully completed
-  Object.keys(response.sync_status).forEach(cmdId => {
-    if (typeof response.sync_status[cmdId] === 'object') {
-      console.warn(response.sync_status[cmdId].error);
-      vscode.window.showWarningMessage(response.sync_status[cmdId].error);
-    }
-  });
-
-  // Return an array of newly created tasks with id's
-  return tasks
-    // Only process tasks that were sucessfully added, i.e. their temp_id was converted into id
-    .filter(x => x.temp_id && response.temp_id_mapping[x.temp_id])
-    // Construct external URL and add it to the task record
-    .map(x => ({ externalURL: TodoistTaskUrl.stringify({ id: response.temp_id_mapping[x.temp_id] }), ...x }));
-
-  function constructTodoistCommand (task) {
-    const documentLink = ` vscode://file/${encodeURIComponent(task.filePath)}:${task.lineNr+1} ((☰))`;
     const { command, ...taskOptions } = task.sync;
     let args = Object.assign({}, options, taskOptions, {
-      content: task.message.trim() + documentLink,
-      date_string: task.dueDate,
+      content: `${task.message.trim()} ${task.backlinkURL} ((☰))`,
+      due_date: task.dueDate,
       auto_parse_labels: false
     }, TodoistTaskUrl.match(task.externalURL));
 
     if (args.id) {
+      // Update the task by id and return the original object unchanged
       args.id = parseInt(args.id);
-      return {
-        type: 'item_update',
-        uuid: uuid(),
-        args
-      };
+      return post(`https://api.todoist.com/rest/v1/tasks/${args.id}`, args)
+        .then(() => task);
     }
     else {
-      task.temp_id = uuid();
-      return {
-        type: 'item_add',
-        temp_id: task.temp_id,
-        uuid: uuid(),
-        args
-      };
+      // Create the task and set the externalURL attribute before returning it
+      return post('https://api.todoist.com/rest/v1/tasks', args)
+        .then((result) => ({ externalURL: TodoistTaskUrl.stringify({ id: result.id }), ...task }));
     }
   }
-  
+
+  async function post (endpoint, data) {
+    return rp({
+      method: 'POST',
+      uri: endpoint,
+      body: data,
+      headers: requestHeader(token),
+      json: true,
+    });
+  }
+
+}
+
+function requestHeader (token) {
+  return {
+    'User-Agent': 'Request-Promise',
+    'Authorization': `Bearer ${token}`,
+    'X-Request-Id': uuid(),
+  };
 }
 
 /**
@@ -124,10 +113,7 @@ async function getLabels () {
   const options = {
     method: "GET",
     uri: 'https://api.todoist.com/rest/v1/labels',
-    headers: { 
-      'User-Agent': "Request-Promise",
-      'Authorization': `Bearer ${token}`
-    },
+    headers: requestHeader(token),
     json: true
   };
 
@@ -136,22 +122,6 @@ async function getLabels () {
   const content = JSON.stringify(labels, null, 2);
   vscode.workspace.openTextDocument({ content, language: 'json' })
     .then((doc: vscode.TextDocument) => vscode.window.showTextDocument(doc, 1, false));
-}
-
-
-
-
-async function callTodoistSyncAPI (token, commands) {
-
-  const options = {
-    method: "GET",
-    uri: 'https://todoist.com/api/v7/sync',
-    qs:  { token, commands },
-    headers: { "User-Agent": "Request-Promise" },
-    json: true
-  };
-
-  return rp(options);
 }
 
 export { context, updateToken, sync, getLabels };
