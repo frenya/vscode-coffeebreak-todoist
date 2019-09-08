@@ -13,7 +13,8 @@
 		],
 		"activationEvents": [
 				"onCommand:coffeebreak.todoist.sync",
-				"onCommand:coffeebreak.todoist.updateToken"
+				"onCommand:coffeebreak.todoist.updateToken",
+				"onCommand:coffeebreak.todoist.getLabels"
 		],
 		"main": "./dist/extension.js",
 		"publisher": "frenya",
@@ -34,6 +35,10 @@
 						{
 								"command": "coffeebreak.todoist.updateToken",
 								"title": "Coffee Break Plugin: Update Todoist token"
+						},
+						{
+								"command": "coffeebreak.todoist.getLabels",
+								"title": "Coffee Break Plugin: Get Todoist Labels"
 						}
 				]
 		},

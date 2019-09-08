@@ -111,6 +111,36 @@ async function sync (tasks: any[], uri: vscode.Uri, options: object = {}) {
   
 }
 
+/**
+ * Show a list of Todoist labels in a new text editor.
+ */
+async function getLabels () {
+  // Make sure we have an authentication token
+  const token = await getToken();
+  if (!token) {
+    throw new Error('No Todoist token available');
+  }
+
+  const options = {
+    method: "GET",
+    uri: 'https://api.todoist.com/rest/v1/labels',
+    headers: { 
+      'User-Agent': "Request-Promise",
+      'Authorization': `Bearer ${token}`
+    },
+    json: true
+  };
+
+  const labels = await rp(options) || [];
+
+  const content = JSON.stringify(labels, null, 2);
+  vscode.workspace.openTextDocument({ content, language: 'json' })
+    .then((doc: vscode.TextDocument) => vscode.window.showTextDocument(doc, 1, false));
+}
+
+
+
+
 async function callTodoistSyncAPI (token, commands) {
 
   const options = {
@@ -124,4 +154,4 @@ async function callTodoistSyncAPI (token, commands) {
   return rp(options);
 }
 
-export { context, updateToken, sync };
+export { context, updateToken, sync, getLabels };
