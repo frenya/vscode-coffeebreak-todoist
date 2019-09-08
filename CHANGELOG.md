@@ -2,6 +2,11 @@
 
 All notable changes to the "vscode-coffeebreak-todoist" extension will be documented in this file.
 
+## v0.2.1
+2019-09-08
+
+* Fixed typo in documentation
+
 ## v0.2.0
 2019-09-08
 

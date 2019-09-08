@@ -17,7 +17,7 @@ See sample configuration below. This can be done both at workspace or folder lev
   "coffeebreak.sync": {
     "command": "coffeebreak.todoist.sync",
     "project_id": 12345678,
-    "labels": [ 121212, 343434 ]
+    "label_ids": [ 121212, 343434 ]
   },	
   ...
 }
@@ -50,7 +50,7 @@ The following attributes may be provided and will be pass on to the Todoist API.
   ...
   "coffeebreak.sync": {
     "command": "coffeebreak.todoist.sync",
-    "labels": [ <id-of-CoffeeBreak-label> ]
+    "label_ids": [ <id-of-CoffeeBreak-label> ]
   },	
   ...
 }
