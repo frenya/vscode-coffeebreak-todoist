@@ -2,6 +2,8 @@ import * as path from 'path';
 import * as Mocha from 'mocha';
 import * as glob from 'glob';
 
+import * as mocks from './mocks';
+
 export function run(): Promise<void> {
 	// Create the mocha test
 	const mocha = new Mocha({
@@ -17,12 +19,16 @@ export function run(): Promise<void> {
 				return e(err);
 			}
 
+      // Register all mocks
+      mocks.setUp();
+
 			// Add files to the test suite
 			files.forEach(f => mocha.addFile(path.resolve(testsRoot, f)));
 
 			try {
 				// Run the mocha test
 				mocha.run(failures => {
+          mocks.tearDown();
 					if (failures > 0) {
 						e(new Error(`${failures} tests failed.`));
 					} else {
@@ -30,6 +36,7 @@ export function run(): Promise<void> {
 					}
 				});
 			} catch (err) {
+        mocks.tearDown();
 				e(err);
 			}
 		});
