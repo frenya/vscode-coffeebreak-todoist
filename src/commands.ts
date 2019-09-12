@@ -16,14 +16,14 @@ const TodoistTokenKey = 'coffeebreak.todoist.token';
 async function updateToken () {
 
   const token = await vscode.window.showInputBox ({ placeHolder: 'Please, insert Todoist API token ...' });
-  Utils.context.workspaceState.update(TodoistTokenKey, token);
+  Utils.setContextValue(TodoistTokenKey, token);
   return token;
 
 }
 
 async function getToken () {
 
-  let token = Utils.context.workspaceState.get(TodoistTokenKey);
+  let token = Utils.getContextValue(TodoistTokenKey);
 
   if (!token) {
     token = await vscode.commands.executeCommand('coffeebreak.todoist.updateToken');
