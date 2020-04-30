@@ -2,6 +2,13 @@
 
 All notable changes to the "vscode-coffeebreak-todoist" extension will be documented in this file.
 
+## v0.3.0
+2020-04-30
+
+* Added test coverage report
+* Fixed a bunch of security issues in dependencies
+
+
 ## v0.2.1
 2019-09-08
 
