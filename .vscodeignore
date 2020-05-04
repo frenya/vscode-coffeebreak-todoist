@@ -10,3 +10,5 @@ src/
 **/*.ts
 node_modules
 webpack.config.js
+coverconfig.json
+.nyc_output/
