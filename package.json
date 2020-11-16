@@ -14,7 +14,8 @@
   "activationEvents": [
     "onCommand:coffeebreak.todoist.sync",
     "onCommand:coffeebreak.todoist.updateToken",
-    "onCommand:coffeebreak.todoist.getLabels"
+    "onCommand:coffeebreak.todoist.getLabels",
+    "onCommand:coffeebreak.todoist.convertTodoistCSV"
   ],
   "main": "./dist/extension.js",
   "publisher": "frenya",
@@ -39,6 +40,10 @@
       {
         "command": "coffeebreak.todoist.getLabels",
         "title": "Coffee Break Plugin: Get Todoist Labels"
+      },
+      {
+        "command": "coffeebreak.todoist.convertTodoistCSV",
+        "title": "Coffee Break Plugin: Convert Todoist export to Markdown"
       }
     ]
   },
@@ -74,6 +79,7 @@
     "webpack-cli": "^3.3.11"
   },
   "dependencies": {
+    "fast-csv": "^4.3.5",
     "request": "^2.34",
     "request-promise": "^4.2.4",
     "url-pattern": "^1.0.3",
