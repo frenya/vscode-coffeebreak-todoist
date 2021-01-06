@@ -12,7 +12,7 @@ import * as Commands from '../../commands';
 import Utils from '../../utils';
 
 const task = {
-  message: ' neotrimovaný úkol k zapracování  ',
+  text: ' neotrimovaný úkol k zapracování  ',
   lineNr: 25,
   filePath: '/jméno souboru s mezerami a háčky.md',
   dueDate: '2019-12-31',

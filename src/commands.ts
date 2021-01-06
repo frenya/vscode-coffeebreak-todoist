@@ -65,7 +65,7 @@ async function sync (tasks: any[], uri: vscode.Uri, options: object = {}) {
 
     const { command, ...taskOptions } = task.sync;
     let args = Object.assign({}, options, taskOptions, {
-      content: `${task.message.trim()} ${task.backlinkURL} ((☰))`,
+      content: `${task.text.trim()} ${task.backlinkURL} ((☰))`,
       due_date: task.dueDate,
       auto_parse_labels: false
     }, TodoistTaskUrl.match(task.externalURL));
