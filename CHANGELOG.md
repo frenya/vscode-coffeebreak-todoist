@@ -2,6 +2,12 @@
 
 All notable changes to the "vscode-coffeebreak-todoist" extension will be documented in this file.
 
+## v0.5.0
+2021-01-06
+
+* Maintenance update after internal Coffee Break redesign
+* Added ability to convert multiple Todoist exports into Markdown at once
+
 ## v0.4.0
 2020-11-16
 

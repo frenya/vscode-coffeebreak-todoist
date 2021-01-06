@@ -7,6 +7,7 @@ import * as vscode from 'vscode';
 import * as uuid from 'uuid';
 import * as UrlPattern from 'url-pattern';
 import * as rp from 'request-promise';
+import * as moment from 'moment';
 import Utils from './utils';
 import { parse } from 'fast-csv';
 
@@ -132,7 +133,8 @@ async function convertTodoistCSV () {
     filters: {
       'CSV files': [ 'csv' ]
     },
-    title: 'Select Todoist export file'
+    title: 'Select Todoist export file',
+    canSelectMany: true,
   };
   
   const archiveUri:vscode.Uri[] = await vscode.window.showOpenDialog(options);
@@ -141,35 +143,46 @@ async function convertTodoistCSV () {
     return;
   }
 
-  try {
-    var indents = '';
-    var content = [];
+  archiveUri.forEach((uri) => {
+    try {
+      var indents = '';
+      var content = [];
+  
+      fs.createReadStream(uri.fsPath)
+        .pipe(parse({ headers: false }))
+        .on('data', row => {
+          if (row['0'] === 'task') {
+            indents = '\t\t\t\t'.substr(0, row[3] - 1);
+            let dueDateTag = row[6] ? ` @due(${parseDueDate(row[6])})` : '';
+            let priorityTag = row[2] != 4 ? ` @priority(${row[2]})` : '';  // tslint:disable-line:triple-equals
+            content.push(`${indents}- [ ] ${row[1]}${priorityTag}${dueDateTag}`.replace('[ ] *', ''));
+          }
+          else if (row['0'] === 'note') {
+            const prefix = `\n${indents}\t> `;
+            content.push(`${prefix}${row[1].replace(/\[\[file.*\]\]/, '').replace(/\n/g, prefix)}\n`);
+          }
+          else if (row['0'] === 'section') {
+            content.push(`\n# ${row[1]}\n`);
+          }
+        })
+        .on('error', console.error)
+        .on('end', () => {
+          if (content.length) {
+            openNewMarkdownDocument(`# ${path.basename(uri.fsPath, '.csv')}\n\n${content.join('\n')}`);
+          }
+        });
+    }
+    catch (e) {
+      console.error(e);
+    }
+  });
+}
 
-    fs.createReadStream(archiveUri[0].fsPath)
-      .pipe(parse({ headers: false }))
-      .on('data', row => {
-        if (row['0'] === 'task') {
-          indents = '\t\t\t\t'.substr(0, row[3] - 1);
-          content.push(`${indents}- [ ] ${row[1]}`.replace('[ ] *', ''));
-        }
-        else if (row['0'] === 'note') {
-          const prefix = `\n${indents}\t> `;
-          content.push(`${prefix}${row[1].replace(/\[\[file.*\]\]/, '').replace(/\n/g, prefix)}\n`);
-        }
-        else if (row['0'] === 'section') {
-          content.push(`\n# ${row[1]}\n`);
-        }
-      })
-      .on('error', console.error)
-      .on('end', () => {
-        if (content.length) {
-          openNewMarkdownDocument(`# ${path.basename(archiveUri[0].fsPath, '.csv')}\n\n${content.join('\n')}`);
-        }
-      });
-  }
-  catch (e) {
-    console.error(e);
-  }
+function parseDueDate (dateStr) {
+  // This parse format seems to work with Todoist exports best
+  // NOTE: The export must be done without relative dates
+  let dueDate = moment(dateStr, 'DD MMM YYYY');
+  return dueDate.isValid() ? dueDate.format('YYYY-MM-DD') : dateStr;
 }
 
 function openNewMarkdownDocument (content) {
