@@ -111,20 +111,7 @@ function requestHeader (token) {
  * Show a list of Todoist labels in a new text editor.
  */
 async function getLabels () {
-  // Make sure we have an authentication token
-  const token = await getToken();
-  if (!token) {
-    throw new Error('No Todoist token available');
-  }
-
-  const options = {
-    method: "GET",
-    uri: 'https://api.todoist.com/rest/v1/labels',
-    headers: requestHeader(token),
-    json: true
-  };
-
-  const labels = await rp(options) || [];
+  const labels = getLabelsFromTodoist();
 
   const content = JSON.stringify(labels, null, 2);
   vscode.workspace.openTextDocument({ content, language: 'json' })
@@ -194,3 +181,21 @@ function openNewMarkdownDocument (content) {
 }
 
 export { context, updateToken, sync, getLabels, convertTodoistCSV};
+
+async function getLabelsFromTodoist () {
+  // Make sure we have an authentication token
+  const token = await getToken();
+  if (!token) {
+    throw new Error('No Todoist token available');
+  }
+
+  const options = {
+    method: "GET",
+    uri: 'https://api.todoist.com/rest/v1/labels',
+    headers: requestHeader(token),
+    json: true
+  };
+
+  return await rp(options) || [];
+}
+
