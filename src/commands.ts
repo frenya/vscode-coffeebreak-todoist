@@ -23,17 +23,23 @@ async function updateToken () {
     placeHolder: 'Please, insert Todoist API token ...',
     prompt: 'It can be found under Settings -> Integration -> API token'
   });
-  Utils.setContextValue(TodoistTokenKey, token);
+  Utils.setGlobalContextValue(TodoistTokenKey, token);
   return token;
 
 }
 
 async function getToken () {
 
-  let token = Utils.getContextValue(TodoistTokenKey);
+  let token = Utils.getGlobalContextValue(TodoistTokenKey);
 
   if (!token) {
-    token = await vscode.commands.executeCommand('coffeebreak.todoist.updateToken');
+    // Migrate workspace context value (legacy) to global context
+    token = Utils.getContextValue(TodoistTokenKey)
+    if (token) {
+      console.log('Migrating token to global context');
+      Utils.setGlobalContextValue(TodoistTokenKey, token);
+    }
+    else token = await vscode.commands.executeCommand('coffeebreak.todoist.updateToken');
   }
 
   return token;

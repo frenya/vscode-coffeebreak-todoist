@@ -8,6 +8,7 @@ All notable changes to the "vscode-coffeebreak-todoist" extension will be docume
 * Added synchronization setup wizard
 * General cleanup and bugfixing
 * Added Coffee Break extension as a prerequisite
+* Now storing the Todoist token in user state (independent of workspace)
 
 ## v0.5.0
 2021-01-06
