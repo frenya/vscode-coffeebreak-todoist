@@ -13,6 +13,7 @@
   ],
   "activationEvents": [
     "onCommand:coffeebreak.todoist.sync",
+    "onCommand:coffeebreak.todoist.syncSetup",
     "onCommand:coffeebreak.todoist.updateToken",
     "onCommand:coffeebreak.todoist.getLabels",
     "onCommand:coffeebreak.todoist.convertTodoistCSV"
@@ -31,21 +32,37 @@
     "commands": [
       {
         "command": "coffeebreak.todoist.sync",
-        "title": "Coffee Break Plugin: Sync to Todoist (do not run directly)"
+        "title": "Coffee Break Todoist: Sync to Todoist (do not run directly)"
+      },
+      {
+        "command": "coffeebreak.todoist.syncSetup",
+        "title": "Coffee Break Todoist: Setup wizard (do not run directly)"
       },
       {
         "command": "coffeebreak.todoist.updateToken",
-        "title": "Coffee Break Plugin: Update Todoist token"
+        "title": "Coffee Break Todoist: Update Todoist token"
       },
       {
         "command": "coffeebreak.todoist.getLabels",
-        "title": "Coffee Break Plugin: Get Todoist Labels"
+        "title": "Coffee Break Todoist: Get Todoist Labels"
       },
       {
         "command": "coffeebreak.todoist.convertTodoistCSV",
-        "title": "Coffee Break Plugin: Convert Todoist export to Markdown"
+        "title": "Coffee Break Todoist: Convert Todoist export to Markdown"
       }
-    ]
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "coffeebreak.todoist.sync",
+          "when": "false"
+        },
+        {
+          "command": "coffeebreak.todoist.syncSetup",
+          "when": "false"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "webpack --mode production",

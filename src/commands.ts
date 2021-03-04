@@ -180,7 +180,37 @@ function openNewMarkdownDocument (content) {
     .then((doc: vscode.TextDocument) => vscode.window.showTextDocument(doc, 1, false));
 }
 
-export { context, updateToken, sync, getLabels, convertTodoistCSV};
+async function syncSetup () {
+  let result = {};
+
+  const projects = await getProjectsFromTodoist();
+  const projectItems = projects.map((p) => {
+    return {
+      label: p.name,
+      project_id: p.id,
+    };
+  });
+
+  const project = await vscode.window.showQuickPick(projectItems, { placeHolder: 'Select target project' });
+  if (project) result['project_id'] = project['project_id'];
+
+  const labels = await getLabelsFromTodoist();
+  const labelItems = labels.map((p) => {
+    return {
+      label: p.name,
+      label_id: p.id,
+    };
+  });
+
+  const selectedLabels = await vscode.window.showQuickPick(labelItems, { placeHolder: 'Select labels to add to tasks', canPickMany: true });
+  if (selectedLabels) result['label_ids'] = selectedLabels.map(label => label['label_id']);
+
+  console.log(result);
+
+  return result;
+}
+
+export { context, updateToken, sync, getLabels, convertTodoistCSV, syncSetup };
 
 async function getLabelsFromTodoist () {
   // Make sure we have an authentication token
@@ -192,6 +222,23 @@ async function getLabelsFromTodoist () {
   const options = {
     method: "GET",
     uri: 'https://api.todoist.com/rest/v1/labels',
+    headers: requestHeader(token),
+    json: true
+  };
+
+  return await rp(options) || [];
+}
+
+async function getProjectsFromTodoist () {
+  // Make sure we have an authentication token
+  const token = await getToken();
+  if (!token) {
+    throw new Error('No Todoist token available');
+  }
+
+  const options = {
+    method: "GET",
+    uri: 'https://api.todoist.com/rest/v1/projects',
     headers: requestHeader(token),
     json: true
   };
