@@ -102,5 +102,8 @@
     "request-promise": "^4.2.4",
     "url-pattern": "^1.0.3",
     "uuid": "^3.3.2"
-  }
+  },
+  "extensionDependencies": [
+    "frenya.vscode-coffeebreak"
+  ]
 }

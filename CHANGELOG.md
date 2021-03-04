@@ -2,6 +2,13 @@
 
 All notable changes to the "vscode-coffeebreak-todoist" extension will be documented in this file.
 
+## v0.6.0
+2021-03-04
+
+* Added synchronization setup wizard
+* General cleanup and bugfixing
+* Added Coffee Break extension as a prerequisite
+
 ## v0.5.0
 2021-01-06
 
