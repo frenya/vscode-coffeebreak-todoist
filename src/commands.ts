@@ -117,7 +117,7 @@ function requestHeader (token) {
  * Show a list of Todoist labels in a new text editor.
  */
 async function getLabels () {
-  const labels = getLabelsFromTodoist();
+  const labels = await getLabelsFromTodoist();
 
   const content = JSON.stringify(labels, null, 2);
   vscode.workspace.openTextDocument({ content, language: 'json' })
