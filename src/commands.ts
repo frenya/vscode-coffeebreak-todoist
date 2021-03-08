@@ -21,9 +21,10 @@ async function updateToken () {
 
   const token = await vscode.window.showInputBox ({ 
     placeHolder: 'Please, insert Todoist API token ...',
-    prompt: 'It can be found under Settings -> Integration -> API token'
+    prompt: 'It can be found under Settings -> Integration -> API token',
+    ignoreFocusOut: true,
   });
-  Utils.setGlobalContextValue(TodoistTokenKey, token);
+  if (token) Utils.setGlobalContextValue(TodoistTokenKey, token);
   return token;
 
 }
@@ -34,7 +35,7 @@ async function getToken () {
 
   if (!token) {
     // Migrate workspace context value (legacy) to global context
-    token = Utils.getContextValue(TodoistTokenKey)
+    token = Utils.getContextValue(TodoistTokenKey);
     if (token) {
       console.log('Migrating token to global context');
       Utils.setGlobalContextValue(TodoistTokenKey, token);
@@ -208,7 +209,7 @@ async function syncSetup () {
     };
   });
 
-  const selectedLabels = await vscode.window.showQuickPick(labelItems, { placeHolder: 'Select labels to add to tasks', canPickMany: true });
+  const selectedLabels = await vscode.window.showQuickPick(labelItems, { placeHolder: 'Select label(s) to add to tasks', canPickMany: true });
   if (selectedLabels) result['label_ids'] = selectedLabels.map(label => label['label_id']);
 
   console.log(result);
