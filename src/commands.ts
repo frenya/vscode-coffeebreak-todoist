@@ -68,11 +68,19 @@ async function sync (tasks: any[], uri: vscode.Uri, options: object = {}) {
   if (!token) throw new Error('No Todoist token available');
   // else console.log(token);
 
-  return Promise.all(tasks.map(syncTask));
+  const primaryFilePath = uri.fsPath;
+
+  return vscode.window.withProgress({
+    location: vscode.ProgressLocation.Notification,
+    title: "Synchronizing with Todoist ...",
+    cancellable: false
+  }, (progress, token) => {
+    return Promise.all(tasks.map(syncTask));
+  });
 
   async function syncTask (task) {
     // TODO: Move this to Coffee Break itself
-    task.backlinkURL = `vscode://file/${encodeURIComponent(task.filePath)}:${task.lineNr+1}`;
+    // task.backlinkURL = `vscode://file/${encodeURIComponent(task.filePath)}:${task.lineNr+1}`;
 
     const { command, ...taskOptions } = task.sync;
     let args = Object.assign({}, options, taskOptions, {
@@ -84,8 +92,12 @@ async function sync (tasks: any[], uri: vscode.Uri, options: object = {}) {
     if (args.id) {
       // Update the task by id and return the original object unchanged
       args.id = parseInt(args.id);
-      return post(`https://api.todoist.com/rest/v1/tasks/${args.id}`, args)
-        .then(() => task);
+      if (task.filePath === primaryFilePath) {
+        console.log('Updating task', args);
+        await post(`https://api.todoist.com/rest/v1/tasks/${args.id}`, args);
+      }
+      return getCompletionStatus(args.id)
+        .then((result) => ({ completed: result.item.checked, ...task }));
     }
     else {
       // Create the task and set the externalURL attribute before returning it
@@ -102,6 +114,22 @@ async function sync (tasks: any[], uri: vscode.Uri, options: object = {}) {
       headers: requestHeader(token),
       json: true,
     });
+  }
+
+  async function getCompletionStatus (id) {
+    // curl  -d "token=$token" -d "item_id=4643171520" -d "all_data=false"
+    return rp({
+      method: 'GET',
+      uri: "https://api.todoist.com/sync/v8/items/get",
+      qs: {
+        token: token,
+        item_id: id,
+        all_data: false,
+      },
+      // headers: requestHeader(token),
+      json: true,
+    })
+    .catch(console.error);
   }
 
 }
