@@ -21,7 +21,7 @@ async function updateToken () {
 
   const token = await vscode.window.showInputBox ({ 
     placeHolder: 'Please, insert Todoist API token ...',
-    prompt: 'It can be found under Settings -> Integration -> API token',
+    prompt: 'It can be found in Todoist under Settings -> Integration -> API token',
     ignoreFocusOut: true,
   });
   if (token) Utils.setGlobalContextValue(TodoistTokenKey, token);
@@ -198,7 +198,7 @@ async function syncSetup () {
     };
   });
 
-  const project = await vscode.window.showQuickPick(projectItems, { placeHolder: 'Select target project' });
+  const project = await vscode.window.showQuickPick(projectItems, { placeHolder: 'Select target project in Todoist', ignoreFocusOut: true });
   if (project) result['project_id'] = project['project_id'];
 
   const labels = await getLabelsFromTodoist();
@@ -209,7 +209,7 @@ async function syncSetup () {
     };
   });
 
-  const selectedLabels = await vscode.window.showQuickPick(labelItems, { placeHolder: 'Select label(s) to add to tasks', canPickMany: true });
+  const selectedLabels = await vscode.window.showQuickPick(labelItems, { placeHolder: 'Optional: Select Todoist labels to add to tasks when synchronizing', canPickMany: true });
   if (selectedLabels) result['label_ids'] = selectedLabels.map(label => label['label_id']);
 
   console.log(result);
