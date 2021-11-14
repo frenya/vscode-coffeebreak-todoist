@@ -84,7 +84,7 @@ async function sync (tasks: any[], uri: vscode.Uri, options: object = {}) {
 
     const { command, ...taskOptions } = task.sync;
     let args = Object.assign({}, options, taskOptions, {
-      content: `${task.text.trim()} ${task.backlinkURL} ((☰))`,
+      content: `${task.text.trim()} [(☰)](${task.backlinkURL})`,
       due_date: task.dueDate,
       auto_parse_labels: false
     }, TodoistTaskUrl.match(task.externalURL));
@@ -174,20 +174,21 @@ async function convertTodoistCSV () {
       var content = [];
   
       fs.createReadStream(uri.fsPath)
-        .pipe(parse({ headers: false }))
+        .pipe(parse({ headers: true }))
         .on('data', row => {
-          if (row['0'] === 'task') {
-            indents = '\t\t\t\t'.substr(0, row[3] - 1);
-            let dueDateTag = row[6] ? ` @due(${parseDueDate(row[6])})` : '';
-            let priorityTag = row[2] != 4 ? ` @priority(${row[2]})` : '';  // tslint:disable-line:triple-equals
-            content.push(`${indents}- [ ] ${row[1]}${priorityTag}${dueDateTag}`.replace('[ ] *', ''));
+          const { TYPE, CONTENT, PRIORITY, INDENT, DATE } = row;
+          if (TYPE === 'task') {
+            indents = '\t\t\t\t'.substr(0, parseInt(INDENT, 10) - 1);
+            let dueDateTag = DATE ? ` @due(${parseDueDate(DATE)})` : '';
+            let priorityTag = PRIORITY != '4' ? ` @priority(${PRIORITY})` : '';  // tslint:disable-line:triple-equals
+            content.push(`${indents}- [ ] ${CONTENT}${priorityTag}${dueDateTag}`.replace('[ ] *', ''));
           }
-          else if (row['0'] === 'note') {
+          else if (TYPE === 'note') {
             const prefix = `\n${indents}\t> `;
-            content.push(`${prefix}${row[1].replace(/\[\[file.*\]\]/, '').replace(/\n/g, prefix)}\n`);
+            content.push(`${prefix}${CONTENT.replace(/\[\[file.*\]\]/, '').replace(/\n/g, prefix)}\n`);
           }
-          else if (row['0'] === 'section') {
-            content.push(`\n# ${row[1]}\n`);
+          else if (TYPE === 'section') {
+            content.push(`\n# ${CONTENT}\n`);
           }
         })
         .on('error', console.error)

@@ -2,6 +2,12 @@
 
 All notable changes to the "vscode-coffeebreak-todoist" extension will be documented in this file.
 
+## v0.8.0
+2021-03-28
+
+* Better backling formatting using Markdown notation
+* Proper handling of new Todoist export format
+
 ## v0.7.0
 2021-03-28
 
