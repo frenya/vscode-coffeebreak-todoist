@@ -97,7 +97,7 @@
   },
   "dependencies": {
     "fast-csv": "^4.3.6",
-    "moment": "^2.29.1",
+    "moment": "^2.29.2",
     "request": "^2.34",
     "request-promise": "^4.2.4",
     "url-pattern": "^1.0.3",
