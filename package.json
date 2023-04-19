@@ -3,7 +3,7 @@
   "displayName": "Coffee Break: Todoist Sync",
   "description": "Todoist sync plugin for vscode-coffeebreak",
   "icon": "resources/logo/CoffeeBreak.png",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "license": "MIT",
   "engines": {
     "vscode": "^1.66.0"
