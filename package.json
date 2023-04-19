@@ -68,7 +68,7 @@
     "vscode:prepublish": "webpack --mode production",
     "webpack": "webpack --mode development",
     "webpack-dev": "webpack --mode development --watch",
-    "test-compile": "npm run main-out && tsc -p .",
+    "test-compile": "npm run main-out && tsc -p ./",
     "main-out": "json -I -f package.json -e 'this.main=\"./out/extension.js\"'",
     "main-dist": "json -I -f package.json -e 'this.main=\"./dist/extension.js\"'",
     "test": "node ./out/test/runTest.js",
