@@ -2,6 +2,12 @@
 
 All notable changes to the "vscode-coffeebreak-todoist" extension will be documented in this file.
 
+## v0.9.0
+2023-04-19
+
+* Updated from Todoist REST API v1 to v2
+* Important: Sync configuration needs updating, please run the "Coffee Break: Synchronization setup wizard" command again.
+
 ## v0.8.0
 2021-03-28
 

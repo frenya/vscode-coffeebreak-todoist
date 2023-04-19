@@ -1,6 +1,7 @@
 .vscode
 .vscode-test/**
 coverage/
+demo/
 out/**
 src/
 .gitignore
