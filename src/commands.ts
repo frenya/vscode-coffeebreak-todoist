@@ -91,17 +91,24 @@ async function sync (tasks: any[], uri: vscode.Uri, options: object = {}) {
 
     if (args.id) {
       // Update the task by id and return the original object unchanged
-      args.id = parseInt(args.id);
+      // NOTE: Id is now string in API v2
+      // args.id = parseInt(args.id);
       if (task.filePath === primaryFilePath) {
         console.log('Updating task', args);
-        await post(`https://api.todoist.com/rest/v1/tasks/${args.id}`, args);
+        let result = await post(`https://api.todoist.com/rest/v2/tasks/${args.id}`, args);
+        return { completed: result.is_completed, ...task };
       }
-      return getCompletionStatus(args.id)
-        .then((result) => ({ completed: result.item.checked, ...task }));
+      else {
+        console.warn('Skipping', task.filePath, primaryFilePath);
+        // return getCompletionStatus(args.id)
+        //   .then((result) => ({ completed: result.item.checked, ...task }));
+        let result = await get(`https://api.todoist.com/rest/v2/tasks/${args.id}`, {});
+        return { completed: result.is_completed, ...task };
+      }
     }
     else {
       // Create the task and set the externalURL attribute before returning it
-      return post('https://api.todoist.com/rest/v1/tasks', args)
+      return post('https://api.todoist.com/rest/v2/tasks', args)
         .then((result) => ({ externalURL: TodoistTaskUrl.stringify({ id: result.id }), ...task }));
     }
   }
@@ -114,6 +121,18 @@ async function sync (tasks: any[], uri: vscode.Uri, options: object = {}) {
       headers: requestHeader(token),
       json: true,
     });
+  }
+
+  async function get (endpoint, data) {
+    // curl  -d "token=$token" -d "item_id=4643171520" -d "all_data=false"
+    return rp({
+      method: 'GET',
+      uri: endpoint,
+      qs: data,
+      headers: requestHeader(token),
+      json: true,
+    })
+    .catch(console.error);
   }
 
   async function getCompletionStatus (id) {
@@ -231,15 +250,12 @@ async function syncSetup () {
   if (project) result['project_id'] = project['project_id'];
 
   const labels = await getLabelsFromTodoist();
-  const labelItems = labels.map((p) => {
-    return {
-      label: p.name,
-      label_id: p.id,
-    };
-  });
+  const labelItems = labels.map((p) => p.name);
 
   const selectedLabels = await vscode.window.showQuickPick(labelItems, { placeHolder: 'Optional: Select Todoist labels to add to tasks when synchronizing', canPickMany: true });
-  if (selectedLabels) result['label_ids'] = selectedLabels.map(label => label['label_id']);
+  console.log('Selected labels', selectedLabels);
+  // if (selectedLabels) result['labels'] = selectedLabels.map(label => label['name']);
+  if (selectedLabels) result['labels'] = selectedLabels;
 
   console.log(result);
 
@@ -257,7 +273,7 @@ async function getLabelsFromTodoist () {
 
   const options = {
     method: "GET",
-    uri: 'https://api.todoist.com/rest/v1/labels',
+    uri: 'https://api.todoist.com/rest/v2/labels',
     headers: requestHeader(token),
     json: true
   };
@@ -274,7 +290,7 @@ async function getProjectsFromTodoist () {
 
   const options = {
     method: "GET",
-    uri: 'https://api.todoist.com/rest/v1/projects',
+    uri: 'https://api.todoist.com/rest/v2/projects',
     headers: requestHeader(token),
     json: true
   };
