@@ -41,7 +41,7 @@ export async function run(): Promise<void> {
 		ui: 'tdd',
     timeout: 10 * 1000,
 	});
-  mocha.useColors(true);
+  mocha.options.color = true;
   
   // Register all mocks
   mocks.setUp();

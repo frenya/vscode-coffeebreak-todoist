@@ -17,9 +17,10 @@ const task = {
   filePath: '/jméno souboru s mezerami a háčky.md',
   dueDate: '2019-12-31',
   externalURL: 'https://todoist.com/showTask?id=66778899',
+  backlinkURL: 'vscode://file/%2Fjm%C3%A9no%20souboru%20s%20mezerami%20a%20h%C3%A1%C4%8Dky.md:26',
   sync: {
     'command': 'coffeebreak.todoist.sync',
-    'project_id': 123456
+    'project_id': '123456'
   }
 };
 
@@ -27,18 +28,19 @@ suite('Todoist Sync', () => {
   let stub = null;
 
   beforeEach (() => {
-    stub = sinon.stub(Utils, 'getContextValue');
+    stub = sinon.stub(Utils, 'getGlobalContextValue');
     stub.withArgs('coffeebreak.todoist.token').returns('bazinga');
   });
 
   afterEach (() => {
     stub.restore();
+    rp.resetHistory();
   });
 
 	test('should correctly create tasks', () => {
     const { externalURL, ...t } = task;
 
-    return Commands.sync([ t ], vscode.Uri.parse('file:///usr/test'), { label_ids: [ 123, 456 ] })
+    return Commands.sync([ t ], vscode.Uri.parse('file:///usr/test'), { labels: [ 'labelA', 'labelB' ] })
       .then(result => {
         console.log(result);
         // TODO: Assert result
@@ -47,10 +49,10 @@ suite('Todoist Sync', () => {
         sinon.assert.calledWithMatch(rp, {
           body: {
             auto_parse_labels: false,
-            content: 'neotrimovaný úkol k zapracování vscode://file/%2Fjm%C3%A9no%20souboru%20s%20mezerami%20a%20h%C3%A1%C4%8Dky.md:26 ((☰))',
+            content: 'neotrimovaný úkol k zapracování [(☰)](vscode://file/%2Fjm%C3%A9no%20souboru%20s%20mezerami%20a%20h%C3%A1%C4%8Dky.md:26)',
             due_date: '2019-12-31',
-            project_id: 123456,
-            label_ids: [ 123, 456 ],
+            project_id: '123456',
+            labels: [ 'labelA', 'labelB' ],
           },
           headers: {
             Authorization: 'Bearer bazinga',
@@ -59,26 +61,26 @@ suite('Todoist Sync', () => {
           },
           json: true,
           method: 'POST',
-          uri: 'https://api.todoist.com/rest/v1/tasks',
+          uri: 'https://api.todoist.com/rest/v2/tasks',
         });
       });
   });
   
 	test('should correctly update tasks', () => {
-    return Commands.sync([ task ], vscode.Uri.parse('file:///usr/test'), { label_ids: [ 123, 456 ] })
+    return Commands.sync([ task ], vscode.Uri.parse('file:///jm%C3%A9no%20souboru%20s%20mezerami%20a%20h%C3%A1%C4%8Dky.md'), { labels: [ 'labelA', 'labelB' ] })
       .then(result => {
         console.log(result);
         // TODO: Assert result
 
-        sinon.assert.calledTwice(rp);
+        sinon.assert.calledOnce(rp);
         sinon.assert.calledWithMatch(rp, {
           body: {
             auto_parse_labels: false,
-            content: 'neotrimovaný úkol k zapracování vscode://file/%2Fjm%C3%A9no%20souboru%20s%20mezerami%20a%20h%C3%A1%C4%8Dky.md:26 ((☰))',
+            content: 'neotrimovaný úkol k zapracování [(☰)](vscode://file/%2Fjm%C3%A9no%20souboru%20s%20mezerami%20a%20h%C3%A1%C4%8Dky.md:26)',
             due_date: '2019-12-31',
-            id: 66778899,
-            project_id: 123456,
-            label_ids: [ 123, 456 ],
+            id: '66778899',
+            project_id: '123456',
+            labels: [ 'labelA', 'labelB' ],
           },
           headers: {
             Authorization: 'Bearer bazinga',
@@ -87,7 +89,7 @@ suite('Todoist Sync', () => {
           },
           json: true,
           method: 'POST',
-          uri: 'https://api.todoist.com/rest/v1/tasks/66778899',
+          uri: 'https://api.todoist.com/rest/v2/tasks/66778899',
         });
       });
   });
