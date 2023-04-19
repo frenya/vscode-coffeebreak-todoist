@@ -94,14 +94,11 @@ async function sync (tasks: any[], uri: vscode.Uri, options: object = {}) {
       // NOTE: Id is now string in API v2
       // args.id = parseInt(args.id);
       if (task.filePath === primaryFilePath) {
-        console.log('Updating task', args);
         let result = await post(`https://api.todoist.com/rest/v2/tasks/${args.id}`, args);
         return { completed: result.is_completed, ...task };
       }
       else {
         console.warn('Skipping', task.filePath, primaryFilePath);
-        // return getCompletionStatus(args.id)
-        //   .then((result) => ({ completed: result.item.checked, ...task }));
         let result = await get(`https://api.todoist.com/rest/v2/tasks/${args.id}`, {});
         return { completed: result.is_completed, ...task };
       }
